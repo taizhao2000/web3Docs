@@ -4,6 +4,13 @@
 
 智能合约部署是从开发到生产的关键步骤，需要严格遵循安全流程。
 
+## 📖 核心文档
+
+| 文档 | 说明 |
+|------|------|
+| [智能合约部署与升级成本](./智能合约部署与升级成本.md) | 部署≠执行澄清、EVM硬性限制、部署/运行/升级成本详解、代理模式对比、存储布局冲突 |
+| 部署脚本示例 | 见下方 Hardhat / Foundry 部署脚本 |
+
 ## 部署阶段
 
 ```
@@ -76,7 +83,7 @@ forge script script/DeployToken.s.sol --rpc-url $RPC_URL --broadcast
 | 网络 | Chain ID | RPC |
 |------|----------|-----|
 | Ethereum Mainnet | 1 | https://mainnet.infura.io |
-| Goerli Testnet | 5 | https://goerli.infura.io |
+| Sepolia Testnet | 11155111 | https://rpc.sepolia.org |
 | Polygon | 137 | https://polygon-rpc.com |
 | Arbitrum | 42161 | https://arb1.arbitrum.io/rpc |
 | Optimism | 10 | https://mainnet.optimism.io |
