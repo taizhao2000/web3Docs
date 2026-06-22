@@ -1,39 +1,22 @@
 # Web3.js
 
-## 概述
+Web3.js 是以太坊生态最经典的 JavaScript 库（2015 年）。现已进入维护模式，新项目推荐使用 ethers.js 或 viem。
 
-Web3.js 是以太坊生态最经典的 JavaScript 库，用于与以太坊节点交互。
+## 文档索引
 
-## 安装
-
-```bash
-npm install web3
-```
-
-## 基本用法
-
-```javascript
-const Web3 = require('web3');
-
-// 连接节点
-const web3 = new Web3('https://mainnet.infura.io/v3/YOUR_KEY');
-
-// 查询余额
-const balance = await web3.eth.getBalance('0x...');
-
-// 调用合约
-const contract = new web3.eth.Contract(abi, address);
-const result = await contract.methods.getValue().call();
-
-// 发送交易
-await contract.methods.setValue(42).send({ from: userAddress });
-```
-
-## 核心模块
-
-| 模块 | 功能 |
+| 文档 | 内容 |
 |------|------|
-| web3.eth | 以太坊区块链交互 |
-| web3.utils | 工具函数（编码、单位转换等） |
-| web3.shh | Whisper 协议（已弃用） |
-| web3.bzz | Swarm 存储（已弃用） |
+| [Web3.js 与现代前端栈指南](./Web3.js%20与现代前端栈指南.md) | Web3.js v4 用法、viem vs ethers.js 对比、wagmi + viem + RainbowKit 实战、技术栈选择决策树、Web3.js→ethers.js 迁移对照表 |
+
+## 现代前端栈推荐
+
+```
+React DApp →  wagmi + viem + RainbowKit（最佳开发体验）
+非 React  →  viem（轻量、Tree-shakeable）
+脚本/后端  →  ethers.js v6（简单直接）
+```
+
+## 相关章节
+
+- [ethers.js v6](../ethers.js/) — Web3.js 的现代替代方案
+- [MetaMask 集成](../MetaMask%20集成/) — 钱包接入

@@ -1,36 +1,26 @@
 # MetaMask 集成
 
-## 概述
-
 MetaMask 是最流行的浏览器钱包扩展，DApp 通过 MetaMask 与用户交互。
 
-## 连接流程
+## 文档索引
 
-```javascript
-// 检测 MetaMask
-if (typeof window.ethereum !== 'undefined') {
-  // 请求用户授权
+| 文档 | 内容 |
+|------|------|
+| [MetaMask 集成完整指南](./MetaMask%20集成完整指南.md) | EIP-6963 钱包发现、EIP-1193 标准、连接/断开/账户切换/网络切换、添加自定义链、签名（personal_sign/EIP-712）、交易发送、错误码处理、完整 React Hook |
+
+## 快速开始
+
+```typescript
+// 检测并连接 MetaMask
+if (window.ethereum) {
   const accounts = await window.ethereum.request({
-    method: 'eth_requestAccounts'
+    method: "eth_requestAccounts"
   });
-  console.log('已连接账户:', accounts[0]);
+  console.log("已连接:", accounts[0]);
 }
-
-// 监听账户变更
-window.ethereum.on('accountsChanged', (accounts) => {
-  console.log('账户切换:', accounts[0]);
-});
-
-// 监听链变更
-window.ethereum.on('chainChanged', (chainId) => {
-  console.log('链切换:', chainId);
-  window.location.reload(); // 推荐刷新页面
-});
 ```
 
-## 最佳实践
+## 相关章节
 
-- 使用 EIP-6963 发现钱包提供者（替代 `window.ethereum`）
-- 使用 EIP-1193 标准事件监听
-- 处理网络切换和添加自定义链
-- 优雅降级：未安装 MetaMask 时提供引导
+- [ethers.js v6](../ethers.js/) — BrowserProvider 封装了 MetaMask 的 window.ethereum
+- [WalletConnect v2](../WalletConnect/) — 移动端钱包连接方案

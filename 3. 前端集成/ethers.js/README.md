@@ -1,43 +1,35 @@
 # ethers.js
 
-## 概述
-
 ethers.js 是一个轻量级、安全的以太坊交互库，API 设计更现代，推荐用于新项目。
 
-## 安装
+## 文档索引
+
+| 文档 | 内容 |
+|------|------|
+| [ethers.js v6 完整指南](./ethers.js%20v6%20完整指南.md) | Provider/Signer/Contract 体系、合约交互（读/写/事件/过滤）、交易管理、格式化与单位转换、签名验证、React 集成 Hook、v5→v6 迁移对照表 |
+
+## 快速开始
 
 ```bash
 npm install ethers
 ```
 
-## 基本用法（ethers v6）
+```typescript
+import { BrowserProvider, Contract, formatEther, parseEther } from "ethers";
 
-```javascript
-const { ethers } = require('ethers');
-
-// 连接节点
-const provider = new ethers.JsonRpcProvider('https://mainnet.infura.io/v3/YOUR_KEY');
-
-// 查询余额
-const balance = await provider.getBalance('0x...');
-
-// 合约交互
-const contract = new ethers.Contract(address, abi, provider);
-const value = await contract.getValue();
-
-// 签名者交互
+const provider = new BrowserProvider(window.ethereum);
 const signer = await provider.getSigner();
-const contractWithSigner = contract.connect(signer);
-const tx = await contractWithSigner.setValue(42);
+const contract = new Contract(address, abi, signer);
+
+// 读取
+const balance = await contract.balanceOf(userAddress);
+
+// 写入
+const tx = await contract.transfer(to, parseEther("1.0"));
 await tx.wait();
 ```
 
-## Web3.js vs ethers.js
+## 相关章节
 
-| 特性 | ethers.js | Web3.js |
-|------|-----------|---------|
-| 包大小 | ~100KB | ~300KB |
-| API 风格 | 函数式 | 面向对象 |
-| 类型支持 | TypeScript 原生 | 需类型声明 |
-| 交易处理 | 更安全 | 较灵活 |
-| 推荐度 | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
+- [MetaMask 集成](../MetaMask%20集成/) — 浏览器钱包接入，ethers.js BrowserProvider 的底层
+- [Web3.js 与现代前端栈](../Web3.js/) — viem vs ethers.js 对比，技术栈选择

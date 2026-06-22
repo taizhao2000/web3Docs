@@ -1,51 +1,30 @@
 # WalletConnect
 
-## 概述
+WalletConnect 是连接 DApp 和移动钱包的开放协议，通过二维码实现跨设备连接。
 
-WalletConnect 是一种开放协议，用于 DApp 和移动钱包之间的安全连接。
+## 文档索引
 
-## 核心特性
+| 文档 | 内容 |
+|------|------|
+| [WalletConnect v2 完整指南](./WalletConnect%20v2%20完整指南.md) | v2 架构（Relay/Pairing/Session）、DApp 端集成（SignClient 初始化/连接/签名/断开）、React Hook、与 wagmi 集成 |
 
-- **二维码连接**：DApp 展示二维码，钱包扫码连接
-- **多链支持**：支持多条区块链
-- **推送通知**：交易状态推送
-- **会话管理**：安全的会话生命周期
-
-## 集成方式
-
-```javascript
-import WalletConnect from '@walletconnect/client';
-import QRCodeModal from '@walletconnect/qrcode-modal';
-
-// 创建连接
-const connector = new WalletConnect({
-  bridge: 'https://bridge.walletconnect.org',
-});
-
-// 生成二维码
-if (!connector.connected) {
-  await connector.createSession();
-  const uri = connector.uri;
-  QRCodeModal.open(uri);
-}
-
-// 监听连接
-connector.on('connect', (error, payload) => {
-  const { accounts, chainId } = payload.params[0];
-});
-
-// 发送交易
-const txHash = await connector.sendTransaction({
-  from: address,
-  to: recipient,
-  value: '0x...',
-  data: '0x...',
-});
-```
-
-## 版本演进
+## 版本状态
 
 | 版本 | 状态 | 说明 |
 |------|------|------|
-| v1 | 已弃用 | 基于桥接的通信 |
-| v2 | 当前版本 | 多链、多会话支持 |
+| v1 | ❌ 已弃用 | 基于桥接的通信 |
+| v2 | ✅ 当前版本 | 多链、多会话、端到端加密 |
+
+## 快速开始
+
+```bash
+# 获取 Project ID（免费）
+# 访问 https://cloud.walletconnect.com 注册
+
+npm install @walletconnect/sign-client @walletconnect/modal
+```
+
+## 相关章节
+
+- [MetaMask 集成](../MetaMask%20集成/) — 浏览器端钱包接入
+- [Web3.js 与现代前端栈](../Web3.js/) — wagmi + RainbowKit 内置 WalletConnect 支持
