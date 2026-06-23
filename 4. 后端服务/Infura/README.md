@@ -1,33 +1,26 @@
-# Infura
+# Infura 节点服务
 
-## 概述
+Infura 是 ConsenSys 旗下最流行的以太坊节点即服务（NaaS）平台，提供高性能的标准以太坊 API 访问。
 
-Infura 是 ConsenSys 旗下最流行的以太坊节点即服务（NaaS）平台，提供高性能的 API 访问。
+## 详细指南
 
-## 核心功能
+请参阅核心指南了解更多细节：
+- **[NaaS 节点服务综合指南](../Node_Services_Guide.md)**：涵盖 Infura 的连接配置、全节点与归档节点原理，以及如何使用 `FallbackProvider` 实现 Infura 和 Alchemy 之间的热备。
 
-- **JSON-RPC API**：标准以太坊 RPC 接口
-- **IPFS 网关**：IPFS 内容访问
-- **多链支持**：Ethereum、Polygon、Arbitrum 等
-- **WebSocket**：实时事件订阅
+## 快速配置示例
 
-## 使用方式
+```typescript
+import { JsonRpcProvider } from "ethers";
 
-```javascript
-const provider = new ethers.JsonRpcProvider(
-  'https://mainnet.infura.io/v3/YOUR_PROJECT_ID'
-);
+const INFURA_ID = "YOUR_INFURA_PROJECT_ID";
 
-const wsProvider = new ethers.WebSocketProvider(
-  'wss://mainnet.infura.io/ws/v3/YOUR_PROJECT_ID'
-);
+// 连接主网
+const provider = new JsonRpcProvider(`https://mainnet.infura.io/v3/${INFURA_ID}`);
+
+// 连接 Sepolia 测试网
+const sepoliaProvider = new JsonRpcProvider(`https://sepolia.infura.io/v3/${INFURA_ID}`);
 ```
 
-## 套餐对比
-
-| 特性 | 免费 | 专业 | 企业 |
-|------|------|------|------|
-| 请求/天 | 100K | 300K+ | 自定义 |
-| IPFS 网关 | ✅ | ✅ | ✅ |
-| 团队协作 | ❌ | ✅ | ✅ |
-| SLA | ❌ | ✅ | ✅ |
+## 相关章节
+- [Alchemy 节点服务](../Alchemy/) — 支持更丰富增强型 API 的节点服务商
+- [自建节点](../自建节点/) — 当请求量超出服务商上限时的自部署方案

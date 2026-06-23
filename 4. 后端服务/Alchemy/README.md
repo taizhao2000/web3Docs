@@ -1,36 +1,27 @@
-# Alchemy
+# Alchemy 节点服务
 
-## 概述
+Alchemy 是全栈区块链开发平台，提供超高性能的节点 RPC 服务以及独创的增强型 APIs。
 
-Alchemy 是全栈区块链开发平台，提供节点服务、NFT API、通知等高级功能。
+## 详细指南
 
-## 核心功能
+请参阅核心指南和实战：
+- **[NaaS 节点服务综合指南](../Node_Services_Guide.md)**：深入剖析 Alchemy 的计算单元（CU）计费模式、Token/NFT 增强 API 怎么用，以及如何用 **Notify Webhooks** 实现账户充值秒级通知。
 
-- **增强型 API**：超越标准 RPC 的高级接口
-- **NFT API**：NFT 元数据、持有者查询
-- **Transact**：交易发送和 Gas 优化
-- **Notify**：链上事件通知
-- **Crunch**：归档数据分析
+## 快速调用示例（Token Balance）
 
-## 特色 API
+```typescript
+import { Alchemy, Network } from "alchemy-sdk";
 
-```javascript
-// 获取 NFT 持有者
-const owners = await alchemy.nft.getOwnersForContract(address);
+const config = {
+  apiKey: "YOUR_ALCHEMY_KEY",
+  network: Network.ETH_MAINNET,
+};
+const alchemy = new Alchemy(config);
 
-// 获取代币余额（含价格）
-const balances = await alchemy.core.getTokenBalances(address);
-
-// Gas 优化交易
-const tx = await alchemy.transact.sendPrivateTransaction(signedTx);
+// 快速获取某钱包持有的所有 ERC20 余额
+const balances = await alchemy.core.getTokenBalances("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045");
 ```
 
-## 与 Infura 对比
-
-| 特性 | Alchemy | Infura |
-|------|---------|--------|
-| 标准 RPC | ✅ | ✅ |
-| 增强 API | ✅ | ❌ |
-| NFT API | ✅ | ❌ |
-| 交易加速 | ✅ | ❌ |
-| 免费额度 | 300M CU/月 | 100K 请求/天 |
+## 相关章节
+- [Infura 节点服务](../Infura/) — 标准节点服务
+- [Mempool 与 MEV 服务指南](../Mempool_and_MEV_Guide.md) — 合约高并发交易发送中的 Gas 优化

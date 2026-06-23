@@ -1,40 +1,20 @@
 # 自建节点
 
-## 概述
+自行部署和维护区块链节点，获取完整的控制权、更低的延迟、和免受任何速率限制的归档 Trace 查询。
 
-对于有特殊需求的项目，可以选择自行部署和维护区块链节点。
+## 详细指南
 
-## 常用客户端
+请参阅以下硬核自建运维指南：
+- **[自建以太坊节点深度运维指南](../Self_Hosted_Node_Guide.md)**：使用 Docker Compose 同时启动执行层（Geth）和共识层（Lighthouse）双引擎客户端，配置 Engine API、JWT 验证，并配合 Prometheus + Grafana 实现对节点健康红线的监控。
 
-| 客户端 | 语言 | 用途 |
-|--------|------|------|
-| Geth (Go-Ethereum) | Go | 执行层客户端 |
-| Nethermind | C# | 执行层客户端 |
-| Besu | Java | 执行层客户端（企业友好） |
-| Prysm | Go | 共识层客户端 |
-| Lighthouse | Rust | 共识层客户端 |
-| Teku | Java | 共识层客户端 |
+## 常用双引擎搭配方案
 
-## 部署建议
+| 执行层客户端（EL） | 共识层客户端（CL） | 特点 |
+| :--- | :--- | :--- |
+| **Geth (Go-Ethereum)** | **Lighthouse (Rust)** | 运行最广泛，性能和内存控制最稳健（**推荐**） |
+| **Geth (Go-Ethereum)** | **Prysm (Go)** | 生态最活跃的共识层，UI 指标完善 |
+| **Nethermind (C#)** | **Lighthouse (Rust)** | Nethermind 支持在线状态裁剪（Online Pruning），免手动维护 |
 
-### 硬件要求（以太坊主网全节点）
-
-- **CPU**：4 核以上
-- **内存**：16GB 以上
-- **存储**：2TB+ NVMe SSD
-- **带宽**：25Mbps 以上
-
-### 运维要点
-
-1. 监控节点同步状态
-2. 定期更新客户端版本
-3. 磁盘空间监控和清理
-4. 设置告警和自动重启
-5. 使用反向代理和负载均衡
-
-## 何时自建
-
-- 需要完整归档数据
-- 对隐私有严格要求
-- 大量请求超出第三方额度
-- 需要自定义 RPC 方法
+## 相关章节
+- [NaaS 节点服务综合指南](../Node_Services_Guide.md) — 节点和归档节点的原理介绍
+- [Mempool 监控、Gas 预测与 MEV 实战指南](../Mempool_and_MEV_Guide.md) — 内存池工作原理
