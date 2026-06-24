@@ -1,56 +1,24 @@
-# NFT 市场开发
+# NFT 交易市场开发
 
-## 概述
+NFT 交易市场是实现链上非同质化代币与主流代币原子交换的场所。本模块带你深入探讨去中心化交易平台的底层逻辑演进、现代无 Gas 挂单协议以及安全性要求。
 
-NFT 市场是用户铸造、展示、买卖 NFT 的平台。
+---
 
-## 核心功能
+## 核心学习模块
 
-1. **挂牌（Listing）**：卖家设置价格出售 NFT
-2. **出价（Bidding）**：买家对 NFT 出价
-3. **成交（Sale）**：匹配买卖并完成交易
-4. **拍卖（Auction）**：英式/荷兰式拍卖
+我们在此专题中准备了极具含金量的 LooksRare/Seaport 剖析与生产级分账交易合约：
 
-## 交易模式
+> 📘 **[NFT 交易市场合约开发与 Seaport 架构剖析](./NFT_Marketplace_Guide.md)**
+> 详细涵盖以下核心内容：
+> 1. **交易市场两大模型对比**：解析早期链上托管（Escrow）模式的耗 Gas 弊端，详解现代**授权划转（Approve and Match）模式**在灵活性上的巨大优势。
+> 2. **链下签名挂单（LooksRare/Seaport）**：解析如何利用 **EIP-712 类型化数据签名**，实现卖家本地 0 Gas 上架挂单与改价，并在买家购买时由市场合约在链上瞬时验签并完成原子级交换。
+> 3. **生产级 NFTMarketplace 智能合约**：提供完整代码实现，集成 **ERC-2981 链上自动版税扣除**、**平台佣金分成（Platform Fee Bps）**、以及超额支付自动退款逻辑。
+> 4. **核心漏洞与安全加固**：梳理挂单签名跨链重放攻击（Signature Replay）、重入双花漏洞以及整数算术安全等核心审计避坑指南。
 
-| 模式 | 说明 | 代表 |
-|------|------|------|
-| 直接出售 | 固定价格 | OpenSea |
-| 英式拍卖 | 逐步加价 | Foundation |
-| 荷兰式拍卖 | 价格递减 | Art Blocks |
-| 捆绑出售 | 多 NFT 打包 | OpenSea Bundle |
+---
 
-## 核心合约设计
+## 常见名词速览
 
-```solidity
-contract NFTMarketplace {
-    struct Listing {
-        address seller;
-        address nftContract;
-        uint256 tokenId;
-        uint256 price;
-        bool active;
-    }
-    
-    mapping(uint256 => Listing) public listings;
-    uint256 public listingCount;
-    
-    function listNFT(address nftContract, uint256 tokenId, uint256 price) external {
-        IERC721(nftContract).transferFrom(msg.sender, address(this), tokenId);
-        listings[listingCount] = Listing(msg.sender, nftContract, tokenId, price, true);
-        listingCount++;
-    }
-    
-    function buyNFT(uint256 listingId) external payable {
-        Listing storage listing = listings[listingId];
-        require(listing.active && msg.value >= listing.price);
-        listing.active = false;
-        IERC721(listing.nftContract).transferFrom(address(this), msg.sender, listing.tokenId);
-        payable(listing.seller).transfer(msg.value);
-    }
-}
-```
-
-## 版税实现
-
-使用 ERC-2981 标准或 Seaport 协议实现创作者版税。
+- **SetApprovalForAll**：卖家将特定 NFT 合约中所有 tokenId 的所有权移动权限一次性全局授权给交易市场。
+- **EIP-712**：以太坊上以结构化、人类可读方式展现订单并签名的核心协议。
+- **CEI (Checks-Effects-Interactions)**：检查-效果-交互模式，防范重入攻击的黄金编码红线。
