@@ -1,62 +1,21 @@
-# 审计工具
+# 自动化审计工具与代码自查清单
 
-## 静态分析工具
+依靠人工肉眼排查漏洞极易产生疲劳和盲区。本模块带你深入探讨如何利用工业界主流的静态分析、符号执行工具建立自动检测工作流，以及如何利用 Foundry 开展高阶的不变式模糊测试。
 
-| 工具 | 语言 | 特点 |
-|------|------|------|
-| Slither | Python | 速度快，检测模式丰富 |
-| Securify2 | - | 基于模式匹配 |
-| Solhint | Node.js | Lint 规则检查 |
-| Mythril | Python | 符号执行分析 |
+---
 
-## 动态分析工具
+## 核心学习模块
 
-| 工具 | 说明 |
-|------|------|
-| Echidna | 属性测试（模糊测试） |
-| Harvey | 自动化模糊测试 |
-| Medusa | Go 语言模糊测试框架 |
+> 📘 **[自动化审计工具实战与代码检查清单](./Audit_Tools_Guide.md)**
+> 深入探讨并掌握以下前沿审计手段：
+> 1. **Slither 静态分析**：探讨 AST 语法树转为 SSA（SlithIR）中间语言的 CFG 扫描，一秒识别经典重入和权限漏洞。
+> 2. **Mythril 符号执行**：利用状态分支路径探索约束建立，寻找多步骤交叉重入的隐藏攻击路径。
+> 3. **Foundry 模糊测试 (Fuzzing) & Invariant Testing（不变式测试）**：参数化随机输入与 Handler 模式，在数十万次随机模拟交易中撞击系统底层算术逻辑不变性。
+> 4. **终极 30+ 关键代码审计检查清单**：整理涵盖初始化部署安全、权限安全、算术安全、资产转账与重入、外部依赖、逻辑边界等 6 大大类的通关核查表。
 
-## 形式化验证
+---
 
-| 工具 | 说明 |
-|------|------|
-| Certora Prover | 基于CVL规约语言的形式化验证 |
-| Halmos | Foundry 集成的符号执行工具 |
-| KEVM | K 框架的 EVM 形式化验证 |
+## 自动化测试箴言
 
-## 使用示例
-
-### Slither
-
-```bash
-# 安装
-pip3 install slither-analyzer
-
-# 运行分析
-slither .
-
-# 检测特定漏洞
-slither . --detect reentrancy-eth
-```
-
-### Echidna
-
-```solidity
-// 属性测试示例
-function echidna_test_balance() public view returns (bool) {
-    return token.balanceOf(address(this)) >= 0;
-}
-```
-
-```bash
-echidna-test contracts/MyContract.sol --contract MyContract
-```
-
-## 专业审计公司
-
-- Trail of Bits
-- OpenZeppelin
-- ConsenSys Diligence
-- Certik
-- Quantstamp
+- **不要让机器替你思考，但一定要让机器替你干体力活**。
+- 将 **Slither** 与 **Forge Invariant** 引入项目的 GitHub Actions（CI/CD）中。任何未经静态扫描与万次 Fuzz 验证的代码，一律拒绝并阻断 Merge 进 `main` 开发分支，这是现代化工业级 Web3 研发的必经之路。
