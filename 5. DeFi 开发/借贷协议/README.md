@@ -1,37 +1,24 @@
-# 借贷协议
+# 借贷协议与清算机制
 
-## 概述
+去中心化借贷协议是 DeFi 生态中的信用枢纽。本模块带你深入去中心化借贷的核心记账逻辑、利率模型以及应对黑客攻击的安全要点。
 
-去中心化借贷协议允许用户以加密资产作为抵押品借入其他资产，或存入资产赚取利息。
+---
 
-## 核心机制
+## 核心学习模块
 
-- **超额抵押**：抵押品价值必须大于借款价值
-- **清算**：抵押率不足时触发清算
-- **利率模型**：基于供需的动态利率
-- **利率跳跃模型**：不同利用率区间不同利率
+在这个专题中，我们编写了极具技术含金量的深度指南：
 
-## 代表项目
+> 📘 **[借贷协议与清算机制深度指南](./Lending_and_Liquidation_Guide.md)**
+> 本指南详细涵盖了以下核心板块：
+> 1. **超额抵押与健康因子（Health Factor）模型**：详细解构抵押因子（LTV）、清算阈值的概念，并给出借贷池评估账户安全性的健康因子 $H_f$ 严格计算公式。
+> 2. **Kink 拐点双率利率模型**：探讨如何通过资金利用率 $U$ 来动态调整借贷利率，防止挤兑，并提供一个生产级的 `JumpRateModel` Solidity 计算合约。
+> 3. **Compound cToken 汇率与计息机制**：讲解 cToken 作为存款凭证如何通过 $e = \frac{\text{Cash} + \text{Borrows} - \text{Reserves}}{\text{Total Supply}}$ 实现本息复利增值，以及 Accrue Interest 的链上高频累加。
+> 4. **清算机器人套利实战**：解析 Close Factor（最大单次清算比例）以及清算惩罚带来的套利数学，提供一个能够直接由链下触发、用于套利的 SimpleLiquidationBot 合约。
 
-| 项目 | 特点 |
-|------|------|
-| Aave | 闪电贷、多利率模型 |
-| Compound | 算法利率、cToken |
-| MakerDAO | 超额抵押稳定币 |
-| Euler | 无许可借贷市场 |
+---
 
-## 关键合约接口
+## 常见名词速览
 
-```solidity
-// 存入资产
-function deposit(address asset, uint256 amount, address onBehalfOf, uint16 referralCode) external;
-
-// 借出资产
-function borrow(address asset, uint256 amount, uint256 interestRateMode, uint16 referralCode, address onBehalfOf) external;
-
-// 偿还借款
-function repay(address asset, uint256 amount, uint256 rateMode, address onBehalfOf) external returns (uint256);
-
-// 清算
-function liquidationCall(address collateral, address debt, address user, uint256 debtToCover, bool receiveAToken) external;
-```
+- **Over-collateralization**：超额抵押，链上缺乏信用体系时的唯一防违约手段。
+- **Utilization Rate ($U$)**：资金利用率，反映池子借贷紧张度，通常维持在 $80\%$ 上下为最佳状态。
+- **Health Factor ($H_f$)**：小于 1 时即触发可清算状态，此时任何外部套利机器人均可时代扣债务并折扣价卷走资产。

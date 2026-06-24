@@ -1,62 +1,24 @@
-# 闪贷
+# 闪电贷与链上套利
 
-## 概述
+闪电贷（Flash Loan）是区块链世界特有的金融核武器。它打破了资金门槛，允许任何开发者在不持有任何本金的情况下瞬间调动数千万美元的巨额流动性，并在单个事务（EVM Block）内完成复杂的金融套利。
 
-闪贷（Flash Loan）是一种无需抵押的瞬时贷款，借款和还款在同一个交易内完成。如果还款失败，整笔交易回滚。
+---
 
-## 核心原理
+## 核心学习模块
 
-```
-交易开始 → 借入资产 → 执行套利/清算操作 → 归还资产+手续费 → 交易结束
-                                                              ↑
-                                                    如果归还失败，整个交易回滚
-```
+在这个专题中，我们准备了融合数学公式和生产代码的实战指南：
 
-## 使用场景
+> 📘 **[闪电贷原理、跨 DEX 套利与安全防范指南](./Flash_Loan_and_Arbitrage_Guide.md)**
+> 本指南深度探讨了以下核心原理：
+> 1. **闪电贷的原子性原理**：从 EVM 状态机的底层机制解释为什么闪电贷可以无抵押，以及回滚（Revert）的底层工作流。
+> 2. **跨 DEX 最优套利数量推导**：基于恒定乘积公式，利用一阶求导数学公式求出理论最佳借款额 $\Delta x_{\text{opt}}$，防止滑点过大或套利不充分导致亏损。
+> 3. **Aave V3 闪电贷实战开发**：提供可直接编译和部署的 Aave V3 单币闪电贷执行合约代码 `AaveV3FlashLoanReceiver.sol`。
+> 4. **安全防范与审计**：剖析为什么闪电贷是黑客发动预言机操纵攻击和重入攻击的弹药库，以及如何限制“单区块不可连续操作”等核心防御机制。
 
-| 场景 | 说明 |
-|------|------|
-| 套利 | 跨 DEX 价格差异 |
-| 清算 | 借闪贷清算不足抵押的借款 |
-| 抵押品置换 | 替换 DeFi 仓位的抵押品 |
-| 自我清算 | 无需已有资金即可清算 |
+---
 
-## Aave 闪贷示例
+## 核心要点速查
 
-```solidity
-// 1. 调用闪贷
-function executeFlashLoan() external {
-    address[] memory assets = new address[](1);
-    assets[0] = address(DAI);
-    uint256[] memory amounts = new uint256[](1);
-    amounts[0] = 1000000 * 1e18; // 100万 DAI
-    
-    LENDING_POOL.flashLoan(
-        address(this),  // 接收者
-        assets,
-        amounts,
-        new uint256[](1), // 利率模式
-        address(this),   // onBehalfOf
-        "",              // 参数
-        0                // referralCode
-    );
-}
-
-// 2. 实现回调
-function executeOperation(
-    address[] calldata assets,
-    uint256[] calldata amounts,
-    uint256[] calldata premiums,
-    address initiator,
-    bytes calldata params
-) external returns (bool) {
-    // 在这里执行套利逻辑
-    
-    // 归还借款 + 手续费
-    for (uint i = 0; i < assets.length; i++) {
-        uint amountOwing = amounts[i] + premiums[i];
-        IERC20(assets[i]).approve(address(LENDING_POOL), amountOwing);
-    }
-    return true;
-}
-```
+- **Premium（手续费）**：Aave 的闪电贷手续费目前固定为借入金额的 **$0.05\%$**（$0.0005$）。
+- **Atomicity（原子性）**：单笔交易成功则全套成功，一旦还不上款则由于 `revert` 将此前操作的状态改变彻底回滚。
+- **Spot Price Manipulation**：绝对不要使用 DEX 的即时池子价格作为预言机，否则必然面临闪电贷大额资金砸盘所引发的价格操纵危机。
