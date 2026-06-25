@@ -1,71 +1,22 @@
-# 事件监控
+# 链上事件监控与安全防卫
 
-## 概述
+本模块探讨了如何在合约部署上线后，建立秒级的事件监听监控，保障特权接口发生变动或黑客试探入侵时，团队能抢在第一时间感知并开启自动化抢跑防卫。
 
-链上事件监控是 DApp 运维的核心能力，用于实时跟踪合约状态变化和交易活动。
+---
 
-## 监控方式
+## 核心学习模块
 
-### 1. 事件过滤（ethers.js）
+我们在此专题中准备了解决工业痛点（WebSocket 频繁掉线）的高可靠断线重连引擎：
 
-```javascript
-const contract = new ethers.Contract(address, abi, provider);
+> 📘 **[链上事件监控、断线重连与主动安全防卫](./Event_Monitoring_Guide.md)**
+> 涵盖了以下核心高可靠安全运维技术：
+> 1. **主流监控方案 SaaS 服务**：OpenZeppelin Defender / Sentinel 自动化流程，以及 Tenderly Alerts 基于 Call Trace 的故障仿真和错误日志分析。
+> 2. **WebSocket 掉线死局**：揭示生产环境（PM2）中 RPC 升级或网络抖动引起 Websocket 连接断开、导致普通的 `on` 监听静默挂死、产生安全空窗期的致命痛点。
+> 3. **指数退避自动重连（Exponential Backoff Retry）**：使用 **ethers.js v6** 编写一个高容错、带心跳关闭、自动延时翻倍重试并重新加载订阅的生产级事件监控引擎类。
+> 4. **Slack/Telegram Webhooks 集成**：当捕获到单笔转账大于 1,000,000 的高风险异动时，实时触发 API 发送加粗高亮警报。
 
-// 监听 Transfer 事件
-contract.on('Transfer', (from, to, value, event) => {
-  console.log(`Transfer: ${from} -> ${to}, value: ${value}`);
-  console.log(`Tx: ${event.transactionHash}`);
-});
+---
 
-// 过滤特定条件的事件
-const filter = contract.filters.Transfer(fromAddress);
-contract.on(filter, (from, to, value, event) => {
-  // 只处理特定 from 地址的 Transfer
-});
-```
+## 主动防御思想
 
-### 2. WebSocket 实时监控
-
-```javascript
-const wsProvider = new ethers.WebSocketProvider(
-  'wss://mainnet.infura.io/ws/v3/YOUR_KEY'
-);
-
-// 监听新区块
-wsProvider.on('block', (blockNumber) => {
-  console.log('New block:', blockNumber);
-});
-
-// 监听 Pending 交易
-wsProvider.on('pending', (txHash) => {
-  console.log('Pending tx:', txHash);
-});
-```
-
-### 3. The Graph 订阅
-
-```graphql
-subscription {
-  transfers(orderBy: blockTimestamp, orderDirection: desc, first: 10) {
-    id
-    from
-    to
-    value
-  }
-}
-```
-
-## 监控架构
-
-```
-链上事件 → WebSocket/Filter → 消息队列 → 处理服务 → 数据库/通知
-```
-
-## 工具推荐
-
-| 工具 | 用途 |
-|------|------|
-| Tenderly | 交易监控和模拟 |
-| Forta | 威胁检测机器人 |
-| OpenZeppelin Defender | 自动化运维 |
-| Alchemy Notify | Webhook 通知 |
+安全不应只是被动的，而是要在监听器捕获到异动并于 mempool（内存池）中捕捉到黑客排队攻击时，自动调用 Keeper 节点广播极高 Gas（抢跑）交易，优先触发合约的 Pausable 熔断，将黑客拒之门外。

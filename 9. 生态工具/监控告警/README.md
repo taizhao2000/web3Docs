@@ -1,57 +1,21 @@
-# 监控告警
+# 去中心化监控与告警体系
 
-## 概述
+本模块探讨了如何针对 Web3 项目制定严苛的监控大盘指标红线，确立科学的 P0/P1/P2 故障分级响应机制，以及如何利用 Prometheus 与 Grafana 构建一站式 SecOps 运维监控中心。
 
-Web3 应用的监控告警体系，确保及时发现和响应异常情况。
+---
 
-## 监控维度
+## 核心学习模块
 
-| 维度 | 监控项 | 告警条件 |
-|------|--------|----------|
-| 合约状态 | TVL 变化 | 大额异常流出 |
-| 交易活动 | 交易量/频率 | 突增或骤降 |
-| Gas | Gas 价格 | 超过阈值 |
-| 节点 | 同步状态 | 落后超过 N 个区块 |
-| 权限 | Owner 操作 | 任何权限变更 |
-| 安全 | 异常调用 | 未知合约交互 |
+> 📘 **[去中心化监控告警体系最佳实践](./Monitoring_and_Alerting_Guide.md)**
+> 涵盖了以下工业级安全运维思想与大盘设计：
+> 1. **监控大盘核心指标红线**：
+>    - **协议业务层**：TVL（总锁仓量）异动、非正常大额提现（Outflow）、稳定币/LST 脱锚（De-peg）偏差。
+>    - **基础设施层**：**Keeper/Relayer 热钱包 Gas 余额（低于 0.5 ETH 告警）**、RPC 节点延迟与错误率、区块落后高度脱节监控。
+> 2. **告警分级响应（On-call Alerting Tiering）**：确立 P0（灭顶：一键熔断 + 电话轰炸 PagerDuty）、P1（高危：Slack/TG 通知，30分钟接入）、P2（常规：邮件/收益日报，24小时审计）的分级治理。
+> 3. **Prometheus + Grafana 大盘架构**：解析时序数据库、可视化看板以及报警推送系统的闭环。
 
-## 告警通道
+---
 
-| 通道 | 适用场景 |
-|------|----------|
-| Slack/Discord Webhook | 团队即时通知 |
-| Email | 重要事件 |
-| Telegram Bot | 移动端推送 |
-| PagerDuty | 7×24 值班 |
-| 自定义 Webhook | 集成到内部系统 |
+## 监控控制环思想
 
-## 实现示例
-
-```javascript
-// 简单的监控服务
-const monitor = async () => {
-  const contract = new ethers.Contract(address, abi, provider);
-  
-  // 监控大额转账
-  contract.on('Transfer', async (from, to, value) => {
-    const amount = ethers.formatEther(value);
-    if (parseFloat(amount) > THRESHOLD) {
-      await sendAlert(`大额转账: ${amount} tokens from ${from} to ${to}`);
-    }
-  });
-  
-  // 监控 Owner 变更
-  contract.on('OwnershipTransferred', async (previousOwner, newOwner) => {
-    await sendCriticalAlert(`Owner 变更: ${previousOwner} -> ${newOwner}`);
-  });
-};
-```
-
-## 运维工具
-
-| 工具 | 类型 | 说明 |
-|------|------|------|
-| Grafana + Prometheus | 指标监控 | 经典监控栈 |
-| Tenderly | 链上监控 | 交易模拟和告警 |
-| Forta | 安全监控 | 去中心化检测网络 |
-| Sentinel | 自建监控 | OpenZeppelin 出品 |
+Web3 安全运营要求建立“监控数据读取 -> 指数异动分析 -> 触发分级告警 -> 联动熔断（Action） -> 漏洞热补丁修复（Hotfix） -> 恢复正常”的完整 SecOps 闭环控制流。

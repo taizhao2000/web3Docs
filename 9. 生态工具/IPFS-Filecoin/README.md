@@ -1,41 +1,23 @@
-# IPFS/Filecoin
+# IPFS-Filecoin 去中心化存储
 
-## IPFS 概述
+本模块详细探讨了 Web3 大体积文件（如 NFT 多媒体图片、前端静态网站包、PDF 合约报告）的去中心化存储技术，解决了传统中心化 HTTP 存储易发生 404 丢失、单点宕机及随意被篡改的风险。
 
-IPFS（InterPlanetary File System）是一种点对点的分布式文件系统，使用内容寻址存储和检索数据。
+---
 
-## 核心概念
+## 核心学习模块
 
-- **CID（Content Identifier）**：内容的唯一标识符
-- **DAG**：有向无环图，数据组织方式
-- **Pinning**：固定数据，防止被垃圾回收
-- **Gateway**：HTTP 网关，通过 URL 访问 IPFS 内容
+我们在此专题中准备了高保真的实战指南与生产级 API 上传代码：
 
-## 在 Web3 中的应用
+> 📘 **[去中心化存储 IPFS-Filecoin 与 Pinata 实战](./IPFS_Filecoin_Guide.md)**
+> 深入探索和掌握以下去中心化存储技术：
+> 1. **内容寻址（Content Addressing）与 CID**：理解 IPFS 唯一哈希寻址如何从根本上防范资产内容被暗中修改。
+> 2. **IPFS、Filecoin 与 Arweave 对比**：辨析传输协议、FIL 时空复制证明经济激励层、以及 Arweave 一次付费永久存储（Permaweb）的共识。
+> 3. **Pinning 钉住服务与 Pinata**：解析本地节点断网危机，详解云端常备节点的重大价值。
+> 4. **生产级上传脚本实战**：提供一个完整的 Node.js/TypeScript 脚本，演示如何将本地多媒体上传、自动在内存中动态组装 OpenSea 规范的 JSON、并将 JSON 整体上传生成最终 baseURI 写入合约。
 
-| 用途 | 说明 |
-|------|------|
-| NFT 元数据 | 存储 NFT 的属性和图片 |
-| DApp 前端 | 去中心化托管前端代码 |
-| 数据存储 | 存储大文件，链上存哈希 |
-| 内容分发 | 抗审查的内容发布 |
+---
 
-## 常用工具
+## 核心开发红线
 
-| 工具 | 说明 |
-|------|------|
-| Pinata | IPFS Pinning 服务 |
-| nft.storage | 专为 NFT 设计的 IPFS 存储 |
-| web3.storage | IPFS + Filecoin 存储 |
-| ipfs-http-client | JavaScript IPFS 客户端 |
-
-## Filecoin 概述
-
-Filecoin 是基于 IPFS 的去中心化存储网络，通过经济激励机制确保数据的持久存储。
-
-| 特性 | IPFS | Filecoin |
-|------|------|----------|
-| 存储 | 临时 | 持久（付费） |
-| 激励 | 无 | FIL 代币 |
-| 证明 | 无 | 复制证明+时空证明 |
-| 保证 | 无 | 经济担保 |
+- **不要硬编码 JWT**：在上传脚本中，Pinata API Token / JWT 必须通过 `process.env.PINATA_JWT` 从环境变量中安全读取，绝对不能硬编码提交到公共 GitHub 仓库上，否则必然面临配额被盗刷。
+- **协议头必须是 `ipfs://`**：拼装 JSON 元数据时，代币媒体 URL 必须声明为 `ipfs://Qm...`，由 OpenSea 或 MetaMask 钱包自主就近路由解析。

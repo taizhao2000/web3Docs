@@ -1,86 +1,24 @@
-# The Graph
+# The Graph 链上数据去中心化索引
 
-## 概述
+本模块详细探讨了如何解决以太坊 RPC `eth_getLogs` 在高频、高复杂度关系检索（如：查大额充值用户排名、最近历史流水、多条件筛选统计）时遍历太慢、费用昂贵且易超限中断的难题。
 
-The Graph 是去中心化的链上数据索引协议，让 DApp 可以高效查询区块链数据。
+---
 
-## 核心概念
+## 核心学习模块
 
-- **Subgraph**：定义如何索引数据的配置
-- **Schema**：GraphQL 数据模型定义
-- **Mapping**：将链上事件映射为数据的处理函数
-- **Query**：GraphQL 查询接口
+我们在此专题中准备了极具工业水准的子图核心三件套实战模板：
 
-## Subgraph 开发流程
+> 📘 **[The Graph 链上数据去中心化索引服务指南](./The_Graph_Guide.md)**
+> 深度解析以下 Subgraph 开发核心技术：
+> 1. **去中心化解耦架构**：解析 Graph Node 捕获事件 -> AssemblyScript 脚本重组处理 -> PostgreSQL 高性能落地的底层链下索引流水线。
+> 2. **`schema.graphql` 关系建模**：声明子图数据库中的 Entities，建立 User 与 Deposit 之间的外键绑定。
+> 3. **`subgraph.yaml` 清单配置**：配置 Arbitrum 等网络、扫描起始块（`startBlock`），指定 Mapping 入口。
+> 4. **`mapping.ts` AssemblyScript 代码**：提供完整的、可直接编译部署的事件接收处理和保存实体数据的逻辑脚本。
+> 5. **GraphQL 极速复合条件查询**：演示前端如何使用单次查询，在毫秒内拉取累计充值大于 100 ETH 的前 5 位大户，并嵌套带出他们最近 3 笔流水。
 
-### 1. 定义 Schema（schema.graphql）
+---
 
-```graphql
-type Transfer @entity {
-  id: Bytes!
-  from: Bytes!
-  to: Bytes!
-  value: BigInt!
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-```
+## 优化箴言
 
-### 2. 配置数据源（subgraph.yaml）
-
-```yaml
-dataSources:
-  - kind: ethereum
-    name: Token
-    network: mainnet
-    source:
-      address: "0x..."
-      abi: Token
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.7
-      language: wasm/assemblyscript
-      entities:
-        - Transfer
-      abis:
-        - name: Token
-          file: ./abis/Token.json
-      eventHandlers:
-        - event: Transfer(indexed address,indexed address,uint256)
-          handler: handleTransfer
-      file: ./src/mapping.ts
-```
-
-### 3. 编写映射（mapping.ts）
-
-```typescript
-import { Transfer as TransferEvent } from '../generated/Token/Token';
-import { Transfer } from '../generated/schema';
-
-export function handleTransfer(event: TransferEvent): void {
-  let entity = new Transfer(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  );
-  entity.from = event.params.from;
-  entity.to = event.params.to;
-  entity.value = event.params.value;
-  entity.blockNumber = event.block.number;
-  entity.blockTimestamp = event.block.timestamp;
-  entity.transactionHash = event.transaction.hash;
-  entity.save();
-}
-```
-
-### 4. 查询数据
-
-```graphql
-{
-  transfers(where: { from: "0x..." }, orderBy: blockTimestamp, orderDirection: desc) {
-    id
-    to
-    value
-    blockTimestamp
-  }
-}
-```
+- ** startBlock 同步优化**：必须配置 `startBlock` 为逻辑合约真实部署的区块高度，拒绝 0 块开始的无效漫长历史扫描。
+- **防止实体 ID 碰撞**：流水的实体 ID 应该采用 `txHash + "-" + logIndex` 拼接，防范同一 transaction 内发生多笔同事件触发时状态数据被恶意覆盖。
