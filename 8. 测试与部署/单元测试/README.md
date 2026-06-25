@@ -1,90 +1,22 @@
-# 单元测试
+# 单元测试 (Unit Testing)
 
-## 概述
+单元测试是智能合约测试金字塔中运行速度最快、覆盖面最广的基石。本模块通过全面的 Solidity 和 TypeScript 真实代码对比，带你掌握现代主流合约单元测试的完整技术。
 
-单元测试是智能合约开发的基础保障，确保每个函数按预期工作。
+---
 
-## Hardhat 测试示例
+## 核心学习模块
 
-```javascript
-const { expect } = require('chai');
-const { ethers } = require('hardhat');
+我们在此专题中准备了高保真的实战指南与双框架合约示例：
 
-describe('Token', function () {
-  let Token, token, owner, addr1, addr2;
-  
-  beforeEach(async function () {
-    Token = await ethers.getContractFactory('Token');
-    token = await Token.deploy('MyToken', 'MTK', 1000000);
-    [owner, addr1, addr2] = await ethers.getSigners();
-  });
-  
-  describe('Deployment', function () {
-    it('应设置正确的名称和符号', async function () {
-      expect(await token.name()).to.equal('MyToken');
-      expect(await token.symbol()).to.equal('MTK');
-    });
-    
-    it('应将总供应量分配给部署者', async function () {
-      expect(await token.balanceOf(owner.address)).to.equal(1000000);
-    });
-  });
-  
-  describe('Transfers', function () {
-    it('应正确转账', async function () {
-      await token.transfer(addr1.address, 100);
-      expect(await token.balanceOf(addr1.address)).to.equal(100);
-    });
-    
-    it('余额不足时应回滚', async function () {
-      await expect(
-        token.connect(addr1).transfer(addr2.address, 100)
-      ).to.be.revertedWith('Insufficient balance');
-    });
-  });
-});
-```
+> 📘 **[单元测试深度解析与 Foundry/Hardhat 双框架实战](./Unit_Testing_Guide.md)**
+> 深入探索和掌握以下核心单元测试技术：
+> 1. **Foundry 原生 Solidity 测试**：讲解 `setUp` 初始化，剖析 `vm.prank` 越权模拟、`vm.deal` 余额篡改、`vm.warp` 时间欺骗以及 `vm.expectRevert` / `vm.expectEmit` 报错与事件精确匹配。
+> 2. **Foundry 单元测试实战**：提供 `NestingStore.sol` 被测合约及其完备的 `NestingStore.t.sol` 测试脚本。
+> 3. **Hardhat TypeScript 测试**：讲解如何通过 **`loadFixture`（部署状态快照复用）** 将 Mocha 运行效率提升 10x，提供 TypeScript 的高保真测试。
 
-## Foundry 测试示例
+---
 
-```solidity
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+## 框架抉择导读
 
-import "forge-std/Test.sol";
-import "../src/Token.sol";
-
-contract TokenTest is Test {
-    Token token;
-    address owner = address(this);
-    address alice = makeAddr("alice");
-    
-    function setUp() public {
-        token = new Token("MyToken", "MTK", 1000000);
-    }
-    
-    function testDeployment() public {
-        assertEq(token.name(), "MyToken");
-        assertEq(token.balanceOf(owner), 1000000);
-    }
-    
-    function testTransfer() public {
-        token.transfer(alice, 100);
-        assertEq(token.balanceOf(alice), 100);
-    }
-    
-    function testRevertInsufficientBalance() public {
-        vm.prank(alice);
-        vm.expectRevert("Insufficient balance");
-        token.transfer(owner, 100);
-    }
-}
-```
-
-## 测试覆盖率目标
-
-| 指标 | 最低 | 推荐 |
-|------|------|------|
-| 行覆盖率 | 80% | 95%+ |
-| 分支覆盖率 | 70% | 90%+ |
-| 函数覆盖率 | 90% | 100% |
+- **Solidity 密集测试**：首选 **Foundry**，无需异步等待与类型转换，可获得极致的 Rust 底层执行速度和 call trace 调用追踪报错日志。
+- **全栈与 SDK 联动测试**：如果你的测试需要高频与外部 TS 脚本（如 DApp 前端 SDK、Ethers.js）发生联动交互，采用 **Hardhat Mocha+Chai** 则是极好的选择。

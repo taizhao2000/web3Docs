@@ -1,73 +1,20 @@
-# Gas 优化
+# EVM 极致 Gas 优化
 
-## 概述
+在以太坊与 EVM 中，Gas 费直接决定了用户的交互摩擦成本。高昂的交互成本会把大多数普通散户挡在门外。本模块系统整理了在开发中压榨每一滴 Gas 的黄金秘籍。
 
-Gas 优化是智能合约开发中降低交易成本的关键环节，直接影响用户体验和协议可持续性。
+---
 
-## 存储优化
+## 核心学习模块
 
-| 优化策略 | 节省 | 说明 |
-|----------|------|------|
-| 打包存储变量 | ~20,000 Gas | 将多个小变量放入同一存储槽 |
-| 使用 calldata | ~200 Gas/字 | 只读参数使用 calldata |
-| 缓存存储变量 | ~100 Gas | 循环中缓存 `storage` 变量到 `memory` |
-| 使用 mapping | - | 比 array 更省 Gas |
-| 短字符串 | ~20,000 Gas | 32 字节以内用 bytes32 替代 string |
+> 📘 **[EVM 极致 Gas 优化与省钱秘籍](./Gas_Optimization_Guide.md)**
+> 涵盖了以下核心高性价比优化点：
+> 1. **EVM 存储（Storage）极致优化**：Storage Slot 打包排列（Storage Packing）原理，`constant` / `immutable` 编译内联指令，以及循环内将 Storage 局部变量缓存至内存的操作。
+> 2. **内存（Memory）与输入数据（Calldata）自控**：在 for 循环中使用 `unchecked { ++i; }` 递增、`++i` 代替 `i++`，以及缓存数组长度、只读引用参数一律声明为 `calldata`。
+> 3. **部署层与编译层减负**：自定义 Error `revert MyError()` 代替 `require` 长报错字符串，以及 EVM 优化器（`optimizer_runs`）在部署成本与交互成本之间的黄金权衡。
 
-## 代码示例
+---
 
-### 变量打包
+## 极致省钱秘籍卡
 
-```solidity
-// ❌ 占用 2 个存储槽
-struct Bad {
-    uint256 a;  // 槽 0
-    uint8 b;    // 槽 1
-}
-
-// ✅ 占用 1 个存储槽
-struct Good {
-    uint256 a;  // 槽 0
-    uint8 b;    // 仍在槽 0（打包在一起）
-}
-```
-
-### 缓存存储变量
-
-```solidity
-// ❌ 每次循环都读存储
-uint256 total;
-for (uint i = 0; i < array.length; i++) {
-    total += array[i];
-}
-
-// ✅ 缓存到内存
-uint256 total;
-uint256 len = array.length; // 缓存 length
-for (uint i = 0; i < len; ) {
-    total += array[i];
-    unchecked { ++i; } // 取消溢出检查
-}
-```
-
-### 使用 Custom Errors
-
-```solidity
-// ❌ 字符串错误（更贵）
-require(balance > 0, "Insufficient balance");
-
-// ✅ Custom Error（更省）
-error InsufficientBalance();
-if (balance <= 0) revert InsufficientBalance();
-```
-
-## Gas 消耗参考
-
-| 操作 | Gas |
-|------|-----|
-| 交易基础成本 | 21,000 |
-| SSTORE（新值） | 20,000 |
-| SSTORE（更新） | 5,000 |
-| SLOAD | 2,100 |
-| LOG（1 topic） | 1,125 |
-| CALL | 700+ |
+- **写 Storage packing 肌肉记忆**：在状态变量和 struct 定义时，必须让小于 32 字节（如 uint128, uint64, bool）的变量连续定义。
+- **自定义 Error 标配化**：在 Solidity 0.8.x 阶段，彻底告别 require 错误字符串，全面转型自定义 Error，既能压缩字节码，更能降 interact 交互 Gas。
