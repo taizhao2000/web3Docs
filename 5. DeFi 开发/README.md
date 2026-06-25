@@ -10,7 +10,7 @@
 
 | 核心专题 | 主要内容简介 | 核心文档链接 |
 | :--- | :--- | :--- |
-| **DEX 与 AMM 基础** | 恒定乘积公式、价格影响、滑点计算与滑点保护代码实现。 | [AMM & DEX 核心指南](./DEX%20开发/AMM_and_DEX_Guide.md) |
+| **DEX 与 AMM 基础** | 恒定乘积公式、价格影响、滑点计算、WETH 封装机制与链上无第三方交易全景流程。 | [AMM & DEX 核心指南](./DEX%20开发/AMM_and_DEX_Guide.md)<br>[原生代币 vs ERC-20 & WETH](./DEX%20开发/Native_vs_ERC20_and_WETH.md) |
 | **流动性池与挖矿** | LP Token 的铸造/销毁原理、无常损失（IL）推导与 Synthetix O(1) 挖矿算法。 | [流动性池与无常损失指南](./流动性池/Liquidity_Pool_and_IL_Guide.md) |
 | **超额抵押与借贷** | 健康因子计算、Kink 拐点双率利率模型、cToken 机制与清算机器人实战。 | [借贷与清算机制深度指南](./借贷协议/Lending_and_Liquidation_Guide.md) |
 | **闪电贷与链上套利** | 闪电贷原子性、跨 DEX 最优套利数量求解公式、Aave V3 合约实战及防范。 | [闪电贷原理与套利指南](./闪贷/Flash_Loan_and_Arbitrage_Guide.md) |
