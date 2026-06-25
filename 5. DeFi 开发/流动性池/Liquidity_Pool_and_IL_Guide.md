@@ -9,20 +9,20 @@
 当用户向 AMM（例如 Uniswap V2）中存入代币 X 和 Y 时，池子会向用户按比例发行（Mint）代表其份额的 **LP Token（流动性提供者代币）**。LP Token 遵循 ERC20 标准，可以转移、抵押甚至再质押。
 
 ### 1.1 首次添加流动性（开天辟地）
-当池子为空时，需要初始化池子的流动性。为了防止早期流动性提供者通过操纵极小的代币存入量来卡死池子份额：
+当池子为空时，需要初始化池子的流动性。为了防止早期流动性提供者通过操纵极小的代币存入量来恶意提高流动性单价以卡死后续用户的池子份额：
 
-$$S_{\text{minted}} = \sqrt{x_{\text{deposited}} \cdot y_{\text{deposited}}} - \text{MINIMUM\_LIQUIDITY}$$
+$$S_{\text{minted}} = \sqrt{x_{\text{deposited}} \cdot y_{\text{deposited}}} - L_{\text{min}}$$
 
-- $\text{MINIMUM\_LIQUIDITY}$：默认是 $10^3$（即 $1000$ wei），这部分份额会被永远转入 `address(0)` 锁死。这样可以防止任何人将池子的价值归零，从而导致除零错误，同时也避免了“通胀攻击”的攻击向量。
+- $L_{\text{min}}$（对应代码中的常量 `MINIMUM_LIQUIDITY`）：默认是 $10^3$（即 $1000$ wei），这部分份额会被永远转入零地址 `address(0)` 锁死。这样可以防止任何人将池子的价值归零，从而导致除零错误，同时也彻底避免了对池子的“通胀攻击（Inflation Attack）”漏洞。
 
 ### 1.2 后续按比例添加流动性
 当池子已经有存量流动性时，再次添加流动性必须**严格按照池子现有的代币比例**存入。发行的 LP Token 数量由用户注入的资产占比最低的一方决定（木桶原理）：
 
 $$S_{\text{minted}} = \min \left( \frac{\Delta x}{x} \cdot S_{\text{total}}, \quad \frac{\Delta y}{y} \cdot S_{\text{total}} \right)$$
 
-- $S_{\text{total}}$: 当前已经发行的 LP Token 总供应量。
-- $\Delta x$, $\Delta y$: 用户投入的 X 和 Y 代币数量。
-- $x$, $y$: 注入前池子中 X 和 Y 的储备量。
+- $S_{\text{total}}$: 当前已经发行的 LP Token 总供应量（即代码中的 `totalSupply`）。
+- $\Delta x$, $\Delta y$: 用户此次投入的 X 和 Y 代币数量。
+- $x$, $y$: 注入前池子中 X 和 Y 的储备量（即代码中的 `reserveX` 和 `reserveY`）。
 
 ### 1.3 移除流动性（销毁）
 当 LP 想要撤资时，将 LP Token 退还给合约进行销毁（Burn），合约根据用户持有的份额占总供应量的比例退还其代币：
@@ -89,18 +89,24 @@ Synthetix 首创了一种**分摊累加算法**，无论有多少用户质押，
 #### 核心数学原理：
 我们将一段时间内的总奖励率设为 $R$（每秒发放多少奖励代币），在任意时刻 $t$：
 
-$$\text{Reward Per Token} (r_t) = r_{t-1} + \frac{R \cdot (t - t_{\text{last}})}{L_{\text{total\_staked}}}$$
+$$r_t = r_{t-1} + \frac{R \cdot (t - t_{\text{last}})}{L}$$
 
 其中：
-- $L_{\text{total\_staked}}$: 当前在 Staking 池中被所有用户质押的 LP Token 总量。
-- $r_t$: 累计到当前时间点，每单位 LP 代币应得的奖励总额累计值。
+- $L$（对应代码中的 `_totalSupply`）：当前在 Staking 池中被所有用户质押的 LP Token 总量。
+- $r_t$（对应代码中的 `rewardPerTokenStored`）：累计到当前时间点，每单位 LP 代币应得的奖励总额累计值。
+- $t_{\text{last}}$：上一次触发收益更新的时间戳。
 
 对于任何特定的用户 $i$，其在时间点 $t$ 的**已赚取奖励（Earned）**：
 
-$$\text{Earned}_i = \text{Staked}_i \cdot \left( r_t - r_{\text{user\_paid\_index}, i} \right) + \text{Rewards\_Accrued}_i$$
+$$E_i = S_i \cdot \left( r_t - r_{\text{paid}, i} \right) + A_i$$
 
-- $r_{\text{user\_paid\_index}, i}$：记录用户上次结算时，已经享受过的累计 $r$ 历史值。
-- 当用户质押、提现或加仓时，合约强制先调用 `updateReward` 刷新该用户的历史小账本，将当前利润锁入 `Rewards_Accrued`，并将其 $r_{\text{user\_paid\_index}}$ 抬高到当前的 $r_t$。
+其中：
+- $E_i$（对应代码中的 `earned`）：用户 $i$ 累计已赚取尚未领取的奖励。
+- $S_i$（对应代码中的 `_balances[account]`）：用户 $i$ 当前质押的代币余额。
+- $r_{\text{paid}, i}$（对应代码中的 `userRewardPerTokenPaid[account]`）：记录用户上次结算时，已经享受过的累计全局每单位代币收益。
+- $A_i$（对应代码中的 `rewards[account]`）：用户 $i$ 之前已经锁定且尚未提取的奖励。
+
+当用户质押、提现或加仓时，合约强制先调用 `updateReward` 刷新该用户的历史小账本，将当前利润锁入 $A_i$（`rewards`），并将其 $r_{\text{paid}, i}$ 抬高到当前的全局 $r_t$。
 
 #### 生产级 Staking 极简合约实现：
 ```solidity
