@@ -14,8 +14,10 @@ Web3 开发知识图谱/
 │   │   ├── 去中心化思想的起源.md
 │   │   ├── 《通往奴役之路》核心观点.md
 │   │   └── 比特币白皮书核心解读.md
-│   └── 区块链基础/
-│       └── 区块链技术原理.md
+│   ├── 区块链基础/
+│   │   └── 区块链技术原理.md
+│   └── 账户体系/
+│       └── EOA_RootKey_Passkey_Guide.md
 │
 ├── 2. 核心技术栈/
 │   ├── Solidity 开发/
@@ -117,6 +119,13 @@ Web3 开发知识图谱/
   - 区块结构与 UTXO 模型
   - 工作量证明与共识机制
   - 完整工作流程图解
+
+- ✅ [EOA、Root Key 与 Passkey 关系原理](1.%20基础概念/账户体系/EOA_RootKey_Passkey_Guide.md)
+  - EOA、Root Key、Passkey 的本质定义与边界
+  - 传统 EOA + Root Key 模型的困局
+  - Passkey (WebAuthn/FIDO2) 技术原理与链上实现
+  - 从 EOA 到 AA 账户抽象的范式转移
+  - 核心特性对比矩阵与安全最佳实践
 
 ---
 
